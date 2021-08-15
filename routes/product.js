@@ -18,7 +18,7 @@ router.delete('/:id',deleteProduct);
 router.get('/',getProducts);
 router.get('/:id',getProductById);
 router.post('/addToCart/:id',addToCart);
-router.post('/new',upload.array('images',12),createProduct);
+router.post('/new',createProduct);
 router.get('/categories/:category',getProductByCategory);
 
 module.exports = router;

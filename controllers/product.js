@@ -4,7 +4,6 @@ const Model = require("../models/shoppingCart");
 
 exports.createProduct = async (req, res) => {
 
-
   const data = validateWithJoi(req.body);
   const images = [];
  
@@ -15,11 +14,6 @@ exports.createProduct = async (req, res) => {
  
 
   if (!data.success) return res.status(400).json(data);
-  const isExist = await ProductModel.findOne({ ...req.body });
-  if (isExist)
-    return res
-      .status(400)
-      .json({ success: false, errorMsg: "This product already created" });
 
   const products = await ProductModel.find();
   const newProduct = await new ProductModel({
@@ -29,18 +23,31 @@ exports.createProduct = async (req, res) => {
   });
   newProduct.save();
 
-  res.json({ success: true, payload: newProduct });
+  res.json({ success: true, payload: newProduct});
 };
 
 exports.getProducts = async (req, res) => {
-  const findedProducts = await ProductModel.find();
+  if(req.query.pageNumber) {
+    const findedProducts = await ProductModel.find()
+      .skip((req.query.pageNumber - 1) * req.query.pageSize)
+      .limit(req.query.pageSize)
 
-  if (!findedProducts || findedProducts.length === 0)
-    return res
-      .status(404)
-      .send({ success: false, errorMsg: "Products not found" });
+    if (!findedProducts || findedProducts.length === 0)
+      return res
+        .status(404)
+        .send({ success: false, errorMsg: "Products not found" });
+  
+    res.json({ success: true, payload: findedProducts });
+  } else {
+    const findedProducts = await ProductModel.find();
 
-  res.json({ success: true, payload: findedProducts });
+    if (!findedProducts || findedProducts.length === 0)
+      return res
+        .status(404)
+        .send({ success: false, errorMsg: "Products not found" });
+  
+    res.json({ success: true, payload: findedProducts });
+  }
 };
 
 exports.addToCart = async (req, res) => {
